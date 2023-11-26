@@ -58,6 +58,7 @@ public class ItemDaoImpl implements ItemDao {
                 .filter(i -> i.getName().toLowerCase().contains(text.toLowerCase().trim()) && i.getAvailable())
                 .collect(Collectors.toList());
     }
+
     public List<Item> searchInDescription(String text) {
         return items.values().stream()
                 .filter(i -> i.getDescription().toLowerCase().contains(text.toLowerCase().trim()) && i.getAvailable())
