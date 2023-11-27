@@ -16,7 +16,5 @@ public interface ItemDao {
 
     void deleteItem(Long itemId);
 
-    List<Item> searchInName(String text);
-
-    List<Item> searchInDescription(String text);
+    List<Item> searchByNameAndDescription(String text);
 }

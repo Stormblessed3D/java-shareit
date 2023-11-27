@@ -36,10 +36,10 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User updateUser(User user) {
         User userToUpdate = usersById.get(user.getId());
-        if (user.getName() != null) {
+        if (user.getName() != null && !user.getName().isBlank()) {
             userToUpdate.setName(user.getName());
         }
-        if (user.getEmail() != null) {
+        if (user.getEmail() != null && !user.getEmail().isBlank()) {
             usersByEmail.remove(userToUpdate.getEmail());
             usersByEmail.put(user.getEmail(), user.getId());
             userToUpdate.setEmail(user.getEmail());
@@ -56,7 +56,7 @@ public class UserDaoImpl implements UserDao {
     @Override
     public boolean isEmailUnique(String email, Long userId) {
         if (userId != null) {
-            if (email != null && email.equals(usersById.get(userId).getEmail())) {
+            if (email != null && !email.isBlank() && email.equals(usersById.get(userId).getEmail())) {
                 return true;
             }
         }

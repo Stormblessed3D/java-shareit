@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,17 +11,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.UserService;
 import ru.practicum.shareit.user.validator.OnCreate;
+import ru.practicum.shareit.user.validator.OnUpdate;
 
-import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
+@Controller
 @RequestMapping(path = "/users")
 @Validated
 @RequiredArgsConstructor
@@ -40,21 +40,22 @@ public class UserController {
     }
 
     @PostMapping
-    @Validated({OnCreate.class})
-    public ResponseEntity<UserDto> createUser(@Valid @RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> createUser(@Validated({OnCreate.class}) @RequestBody UserDto userDto) {
         User user = UserMapper.toUser(userDto);
         return ResponseEntity.ok(UserMapper.toUserDto(userService.createUser(user)));
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, @PathVariable @Positive Long userId) {
+    public ResponseEntity<UserDto> updateUser(@Validated({OnUpdate.class}) @RequestBody UserDto userDto,
+                                              @PathVariable @Positive Long userId) {
         User user = UserMapper.toUser(userDto);
         user.setId(userId);
         return ResponseEntity.ok(UserMapper.toUserDto(userService.updateUser(user)));
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable @Positive Long userId) {
+    public ResponseEntity<Void> deleteUser(@PathVariable @Positive Long userId) {
         userService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -13,16 +13,9 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handle(MethodArgumentNotValidException e) {
-        log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);
-        return Map.of("Ошибка валидации", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handle(ConstraintViolationException e) {
+    public Map<String, String> handle(RuntimeException e) {
         log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);
         return Map.of("Ошибка валидации", e.getMessage());
     }
@@ -39,5 +32,12 @@ public class ErrorHandler {
     public Map<String, String> handle(InvalidEmailException e) {
         log.warn("Получен статус 409 Conflict {}", e.getMessage(), e);
         return Map.of("Ошибка валидации", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Map<String, String> handle(Throwable e) {
+        log.warn("Получен статус 500 Internal ServerError {}", e.getMessage(), e);
+        return Map.of("Внутренняя ошибка сервера", e.getMessage());
     }
 }

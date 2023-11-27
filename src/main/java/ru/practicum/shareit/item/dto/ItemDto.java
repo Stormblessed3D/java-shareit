@@ -14,10 +14,8 @@ import javax.validation.constraints.NotNull;
 public class ItemDto {
     @EqualsAndHashCode.Include
     private long id;
-    @NotNull(groups = OnCreate.class)
     @NotBlank(groups = OnCreate.class)
     private String name;
-    @NotNull(groups = OnCreate.class)
     @NotBlank(groups = OnCreate.class)
     private String description;
     @NotNull(groups = OnCreate.class)

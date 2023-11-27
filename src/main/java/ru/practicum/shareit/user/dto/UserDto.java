@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.practicum.shareit.user.validator.OnCreate;
+import ru.practicum.shareit.user.validator.OnUpdate;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -14,8 +15,9 @@ import javax.validation.constraints.NotBlank;
 public class UserDto {
     @EqualsAndHashCode.Include
     private long id;
+    @NotBlank(groups = OnCreate.class)
     private String name;
-    @Email
+    @Email(groups = {OnCreate.class, OnUpdate.class})
     @NotBlank(groups = OnCreate.class)
     private String email;
 

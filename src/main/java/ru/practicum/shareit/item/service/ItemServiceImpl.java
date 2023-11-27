@@ -8,11 +8,8 @@ import ru.practicum.shareit.item.dao.ItemDao;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dao.UserDao;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Service
 @Slf4j
@@ -23,8 +20,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> getItems(Long ownerId) {
-        userDao.getUserById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Владелец вещи с id %d не найден", ownerId)));
+        checkUser(ownerId);
         return itemDao.getItems(ownerId);
     }
 
@@ -36,9 +32,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item createItem(Item item) {
-        userDao.getUserById(item.getOwnerId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Владелец вещи с id %d не найден",
-                        item.getOwnerId())));
+        checkUser(item.getOwnerId());
         Item createdItem = itemDao.createItem(item);
         log.info("Новая вещь c id {} создана", createdItem.getId());
         return createdItem;
@@ -46,9 +40,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Item updateItem(Item item) {
-        userDao.getUserById(item.getOwnerId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Владелец вещи с id %d не найден",
-                        item.getOwnerId())));
+        checkUser(item.getOwnerId());
         Item itemToUpdate = getItemById(item.getId());
         if (!Objects.equals(itemToUpdate.getOwnerId(), item.getOwnerId())) {
             throw new EntityNotFoundException("Редактировать вещь может только владелец");
@@ -70,13 +62,14 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<Item> search(String text) {
-        if (text.isEmpty()) {
-            return new ArrayList<>();
+        if (text.isBlank()) {
+            return List.of();
         }
-        Set<Item> items = new HashSet<>();
-        items.addAll(itemDao.searchInName(text));
-        items.addAll(itemDao.searchInDescription(text));
-        return new ArrayList<>(items);
+        return itemDao.searchByNameAndDescription(text);
     }
 
+    private void checkUser(Long ownerId) {
+        userDao.getUserById(ownerId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Владелец вещи с id %d не найден", ownerId)));
+    }
 }
