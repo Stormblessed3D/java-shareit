@@ -43,7 +43,7 @@ public class ItemDaoImpl implements ItemDao {
         if (item.getName() != null && !item.getName().isBlank()) {
             itemToUpdate.setName(item.getName());
         }
-        if (item.getDescription() != null &&!item.getDescription().isBlank()) {
+        if (item.getDescription() != null && !item.getDescription().isBlank()) {
             itemToUpdate.setDescription(item.getDescription());
         }
         if (item.getAvailable() != null) {
