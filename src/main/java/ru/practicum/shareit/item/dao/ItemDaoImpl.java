@@ -20,7 +20,7 @@ public class ItemDaoImpl implements ItemDao {
 
     @Override
     public List<Item> getItems(Long ownerId) {
-        return userItemIndex.get(ownerId);
+        return userItemIndex.getOrDefault(ownerId, List.of());
     }
 
     @Override
