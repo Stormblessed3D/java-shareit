@@ -10,10 +10,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class WebMvcConfig extends WebMvcConfigurerAdapter {
 
     @Autowired
-    HandlerInterceptor LoggerInterceptor;
+    HandlerInterceptor loggerInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(LoggerInterceptor);
+        registry.addInterceptor(loggerInterceptor);
     }
 }

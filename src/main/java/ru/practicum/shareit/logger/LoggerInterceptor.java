@@ -13,7 +13,7 @@ import java.util.Enumeration;
 @Component
 public class LoggerInterceptor implements HandlerInterceptor {
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         log.info("[preHandle][" + request + "]" + "[" + request.getMethod() + "]" + request.getRequestURI()
                 + getParameters(request));
         return true;
@@ -21,13 +21,13 @@ public class LoggerInterceptor implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
-                           ModelAndView modelAndView) throws Exception {
+                           ModelAndView modelAndView) {
         log.info("[postHandle][" + request + "]");
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
-                                Exception ex) throws Exception {
+                                Exception ex) {
         if (ex != null) {
             ex.printStackTrace();
         }
