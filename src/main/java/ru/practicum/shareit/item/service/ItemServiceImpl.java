@@ -1,75 +1,141 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.BookingRepository;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.comment.Comment;
+import ru.practicum.shareit.comment.CommentDto;
+import ru.practicum.shareit.comment.CommentMapper;
+import ru.practicum.shareit.comment.CommentRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
-import ru.practicum.shareit.item.dao.ItemDao;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.ItemRepository;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.dao.UserDao;
+import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserRepository;
 
+import javax.validation.ConstraintViolationException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
-    private final ItemDao itemDao;
-    private final UserDao userDao;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final BookingRepository bookingRepository;
 
     @Override
-    public List<Item> getItems(Long ownerId) {
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<ItemDto> getItems(Long ownerId) {
         checkUser(ownerId);
-        return itemDao.getItems(ownerId);
+        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        return items.stream()
+                .map(ItemMapper::toItemDtoWithBookings)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public Item getItemById(Long itemId) {
-        return itemDao.getItemById(itemId)
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Cacheable(cacheNames = "items", key = "#itemId")
+    public ItemDto getItemById(Long itemId, Long userId) {
+        Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        if (checkIsOwner(item.getOwner().getId(), userId)) {
+            return ItemMapper.toItemDtoWithBookings(item);
+        } else {
+            return ItemMapper.toItemDto(item);
+        }
     }
 
     @Override
-    public Item createItem(Item item) {
-        checkUser(item.getOwnerId());
-        Item createdItem = itemDao.createItem(item);
-        log.info("Новая вещь c id {} создана", createdItem.getId());
-        return createdItem;
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public ItemDto createItem(ItemDto itemDto, Long ownerId) {
+        User owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", ownerId)));
+        Item item = itemRepository.save(ItemMapper.toItem(itemDto, owner));
+        return ItemMapper.toItemDto(item);
     }
 
     @Override
-    public Item updateItem(Item item) {
-        checkUser(item.getOwnerId());
-        Item itemToUpdate = getItemById(item.getId());
-        if (!Objects.equals(itemToUpdate.getOwnerId(), item.getOwnerId())) {
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @CachePut(cacheNames = "items", key = "#itemId")
+    public ItemDto updateItem(ItemDto itemDto, Long itemId, Long ownerId) {
+        Item itemToUpdate = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        checkUser(ownerId);
+        if (!Objects.equals(itemToUpdate.getOwner().getId(), ownerId)) {
             throw new EntityNotFoundException("Редактировать вещь может только владелец");
         }
-        Item updatedItem = itemDao.updateItem(item);
-        log.info("Вещь c id {} была обновлена", updatedItem.getId());
-        return updatedItem;
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
+            itemToUpdate.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
+            itemToUpdate.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            itemToUpdate.setAvailable(itemDto.getAvailable());
+        }
+        itemRepository.save(itemToUpdate);
+        return ItemMapper.toItemDto(itemToUpdate);
     }
 
     @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @CacheEvict(cacheNames = "items", key = "#itemId")
     public void deleteItem(Long itemId, Long ownerId) {
-        Item itemToDelete = getItemById(itemId);
-        if (!Objects.equals(itemToDelete.getOwnerId(), ownerId)) {
+        Item itemToDelete = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        if (!Objects.equals(itemToDelete.getOwner().getId(), ownerId)) {
             throw new EntityNotFoundException("Удалить вещь может только владелец");
         }
-        itemDao.deleteItem(itemId);
-        log.info("Вещь c id {} была удалена", itemId);
+        itemRepository.deleteById(itemId);
     }
 
     @Override
-    public List<Item> search(String text) {
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
+    public List<ItemDto> search(String text) {
         if (text.isBlank()) {
             return List.of();
         }
-        return itemDao.searchByNameAndDescription(text);
+        return itemRepository.findByNameOrDescriptionContainingIgnoreCase(text).stream()
+                .map(ItemMapper::toItemDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public CommentDto createComment(CommentDto commentDto, Long itemId, Long userId) {
+        User author = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId)));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
+        List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
+        if (bookings.size() == 0) {
+            throw new ConstraintViolationException("Комментарий может оставлять только пользователь, бронировавший вещь " +
+                    "и только к завершенным бронированиям", null);
+        }
+        Comment comment = commentRepository.save(CommentMapper.toComment(commentDto, item, author));
+        return CommentMapper.toCommentDto(comment);
     }
 
     private void checkUser(Long ownerId) {
-        userDao.getUserById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Владелец вещи с id %d не найден", ownerId)));
+        if (!userRepository.existsById(ownerId)) {
+            throw new EntityNotFoundException(String.format("Пользователь с id %d не найден", ownerId));
+        }
+    }
+
+    private boolean checkIsOwner(Long ownerId, Long userId) {
+        return Objects.equals(ownerId, userId);
     }
 }

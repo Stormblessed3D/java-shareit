@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserForBookingDto;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserMapper {
@@ -14,9 +15,14 @@ public class UserMapper {
                 .build();
     }
 
+    public static UserForBookingDto toUserForBookingDto(User user) {
+        return UserForBookingDto.builder()
+                .id(user.getId())
+                .build();
+    }
+
     public static User toUser(UserDto userDto) {
         return User.builder()
-                .id(userDto.getId())
                 .name(userDto.getName())
                 .email(userDto.getEmail())
                 .build();

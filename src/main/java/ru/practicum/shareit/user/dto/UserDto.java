@@ -14,7 +14,7 @@ import javax.validation.constraints.NotBlank;
 @Builder
 public class UserDto {
     @EqualsAndHashCode.Include
-    private long id;
+    private Long id;
     @NotBlank(groups = OnCreate.class)
     private String name;
     @Email(groups = {OnCreate.class, OnUpdate.class})

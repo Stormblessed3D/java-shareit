@@ -18,7 +18,6 @@ import ru.practicum.shareit.user.validator.OnUpdate;
 
 import javax.validation.constraints.Positive;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(path = "/users")
@@ -29,28 +28,23 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers().stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toList()));
+        return ResponseEntity.ok(userService.getUsers());
     }
 
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> getUserById(@PathVariable @Positive Long userId) {
-        return ResponseEntity.ok(UserMapper.toUserDto(userService.getUserById(userId)));
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @PostMapping
     public ResponseEntity<UserDto> createUser(@Validated({OnCreate.class}) @RequestBody UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        return ResponseEntity.ok(UserMapper.toUserDto(userService.createUser(user)));
+        return ResponseEntity.ok(userService.createUser(userDto));
     }
 
     @PatchMapping("/{userId}")
     public ResponseEntity<UserDto> updateUser(@Validated({OnUpdate.class}) @RequestBody UserDto userDto,
                                               @PathVariable @Positive Long userId) {
-        User user = UserMapper.toUser(userDto);
-        user.setId(userId);
-        return ResponseEntity.ok(UserMapper.toUserDto(userService.updateUser(user)));
+        return ResponseEntity.ok(userService.updateUser(userDto, userId));
     }
 
     @DeleteMapping("/{userId}")
