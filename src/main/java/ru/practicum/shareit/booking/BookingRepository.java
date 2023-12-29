@@ -1,10 +1,12 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,42 +32,37 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where i.owner.id = ?1 " +
-            "order by bkng.start desc")
-    List<Booking> findAllByItemOwnerIdOrderByStartDesc(Long ownerId);
+            "where i.owner.id = ?1 ")
+    List<Booking> findAllByItemOwnerIdOrderByStart(Long ownerId, Sort sort);
 
     @Query("select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where (i.owner.id = ?1) and (bkng.start < ?2) and (bkng.end > ?3)" +
-            "order by bkng.start desc")
-    List<Booking> findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long ownerId, LocalDateTime now1,
-                                                                                LocalDateTime now2);
+            "where (i.owner.id = ?1) and (bkng.start < ?2) and (bkng.end > ?3)")
+    List<Booking> findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStart(Long ownerId, LocalDateTime now1,
+                                                                            LocalDateTime now2, Sort sort);
 
     @Query("select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where (i.owner.id = ?1) and (bkng.end < ?2)" +
-            "order by bkng.start desc")
-    List<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(Long ownerId, LocalDateTime now);
+            "where (i.owner.id = ?1) and (bkng.end < ?2)")
+    List<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStart(Long ownerId, LocalDateTime now, Sort sort);
 
     @Query("select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where (i.owner.id = ?1) and (bkng.start > ?2)" +
-            "order by bkng.start desc")
-    List<Booking> findAllByItemOwnerIdAndStartAfterOrderByStartDesc(Long ownerId, LocalDateTime now);
+            "where (i.owner.id = ?1) and (bkng.start > ?2)")
+    List<Booking> findAllByItemOwnerIdAndStartAfterOrderByStart(Long ownerId, LocalDateTime now, Sort sort);
 
     @Query("select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where (i.owner.id = ?1) and (bkng.status = ?2)" +
-            "order by bkng.start desc")
-    List<Booking> findAllByItemOwnerIdAndStatusOrderByStartDesc(Long ownerId, BookingStatus status);
+            "where (i.owner.id = ?1) and (bkng.status = ?2)")
+    List<Booking> findAllByItemOwnerIdAndStatusOrderByStart(Long ownerId, BookingStatus status, Sort sort);
 
     @Query(value = "select count(*) " +
             "from bookings as b " +
@@ -77,4 +74,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
     List<Booking> findAllByItemIdAndBookerIdAndEndBefore(Long itemId, Long userId, LocalDateTime now);
+
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
+    List<Booking> findByItemInAndStatus(List<Item> items, BookingStatus status, Sort sort);
+
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
+    List<Booking> findByItemAndStatus(Item item, BookingStatus status);
 }

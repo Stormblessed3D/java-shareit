@@ -20,7 +20,7 @@ public class ItemTrailListener {
         if (item.getId() == null || item.getId() == 0) {
             log.info("[ITEM AUDIT] About to add a item to database");
         } else {
-            log.info("[ITEM AUDIT] About to update/delete item: " + item.getId());
+            log.info("[ITEM AUDIT] About to update/delete item: {}", item.getId());
         }
     }
 
@@ -28,11 +28,11 @@ public class ItemTrailListener {
     @PostUpdate
     @PostRemove
     private void afterAnyUpdate(Item item) {
-        log.info("[ITEM AUDIT] add/update/delete complete for item: " + item.getId());
+        log.info("[ITEM AUDIT] add/update/delete complete for item: {}", item.getId());
     }
 
     @PostLoad
     private void afterLoad(Item item) {
-        log.info("[ITEM AUDIT] item loaded from database: " + item.getId());
+        log.info("[ITEM AUDIT] item loaded from database: {}", item.getId());
     }
 }

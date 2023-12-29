@@ -20,6 +20,7 @@ public class BookingDtoReceived {
     @NotNull
     @FutureOrPresent
     private LocalDateTime end;
+    @NotNull
     private Long itemId;
 
     public BookingDtoReceived(long id, LocalDateTime start, LocalDateTime end, Long itemId) {

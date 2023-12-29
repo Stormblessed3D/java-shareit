@@ -1,11 +1,17 @@
 package ru.practicum.shareit.comment;
 
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import ru.practicum.shareit.item.model.Item;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    @Query(value = "insert into comments(text, item_id, author_id, created) values(?1, ?2, ?3, ?4)", nativeQuery = true)
-    Comment saveComment(String text, Long itemId, Long authorId, LocalDateTime created);
+
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "author"})
+    List<Comment> findByItemIn(List<Item> items, Sort sort);
+
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "author"})
+    List<Comment> findByItem(Item item);
 }

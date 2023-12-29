@@ -5,12 +5,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.comment.Comment;
 import ru.practicum.shareit.item.ItemTrailListener;
 import ru.practicum.shareit.user.User;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EntityListeners;
@@ -20,9 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.Set;
 
 @Entity
 @Table(name = "items")
@@ -44,21 +39,12 @@ public class Item {
     @JoinColumn(name = "owner_id", referencedColumnName = "user_id", nullable = false)
     @ToString.Exclude
     private User owner;
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private Set<Booking> bookings;
-    @OneToMany(mappedBy = "item", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @ToString.Exclude
-    private Set<Comment> comments;
 
-    public Item(Long id, String name, String description, Boolean available, User owner, Set<Booking> bookings,
-                Set<Comment> comments) {
+    public Item(Long id, String name, String description, Boolean available, User owner) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
         this.owner = owner;
-        this.bookings = bookings;
-        this.comments = comments;
     }
 }
