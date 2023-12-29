@@ -13,9 +13,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
@@ -27,11 +26,7 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .build();
-        if (comments != null) {
-            itemDtoResponse.setComments(CommentMapper.toCommentDto(comments));
-        } else {
-            itemDtoResponse.setComments(List.of());
-        }
+        itemDtoResponse.setComments(CommentMapper.toCommentDto(comments));
         return itemDtoResponse;
     }
 
@@ -42,34 +37,28 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .build();
-        if (bookings != null && (bookings.size() != 0)) {
-            List<Booking> nextBookings = bookings.stream()
+        if (bookings.size() != 0) {
+            Optional<Booking> nextBooking = bookings.stream()
                     .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
-                    .sorted(Comparator.comparing(Booking::getStart))
-                    .collect(Collectors.toList());
-            if (nextBookings.size() != 0) {
-                BookingForItemDto nextBooking = new BookingForItemDto();
-                nextBooking.setId(nextBookings.get(0).getId());
-                nextBooking.setBookerId(nextBookings.get(0).getBooker().getId());
-                itemDtoResponse.setNextBooking(nextBooking);
+                    .findFirst();
+            if (nextBooking.isPresent()) {
+                BookingForItemDto nextBookingDto = new BookingForItemDto();
+                nextBookingDto.setId(nextBooking.get().getId());
+                nextBookingDto.setBookerId(nextBooking.get().getBooker().getId());
+                itemDtoResponse.setNextBooking(nextBookingDto);
             }
 
-            List<Booking> lastBookings = bookings.stream()
+            Optional<Booking> lastBooking = bookings.stream()
                     .filter(b -> !b.getStart().isAfter(LocalDateTime.now()))
-                    .sorted(Comparator.comparing(Booking::getEnd).reversed())
-                    .collect(Collectors.toList());
-            BookingForItemDto lastBooking = new BookingForItemDto();
-            if (lastBookings.size() != 0) {
-                lastBooking.setId(lastBookings.get(0).getId());
-                lastBooking.setBookerId(lastBookings.get(0).getBooker().getId());
-                itemDtoResponse.setLastBooking(lastBooking);
+                    .reduce((first, second) -> second);
+            if (lastBooking.isPresent()) {
+                BookingForItemDto lastBookingDto = new BookingForItemDto();
+                lastBookingDto.setId(lastBooking.get().getId());
+                lastBookingDto.setBookerId(lastBooking.get().getBooker().getId());
+                itemDtoResponse.setLastBooking(lastBookingDto);
             }
         }
-        if (comments != null) {
-            itemDtoResponse.setComments(CommentMapper.toCommentDto(comments));
-        } else {
-            itemDtoResponse.setComments(List.of());
-        }
+        itemDtoResponse.setComments(CommentMapper.toCommentDto(comments));
         return itemDtoResponse;
     }
 

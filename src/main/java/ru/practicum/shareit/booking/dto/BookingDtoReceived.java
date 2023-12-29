@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.dto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ru.practicum.shareit.booking.validation.EndDateAfterStart;
 
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
@@ -11,13 +12,12 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
+@EndDateAfterStart
 public class BookingDtoReceived {
     @EqualsAndHashCode.Include
     private long id;
-    @NotNull
     @FutureOrPresent
     private LocalDateTime start;
-    @NotNull
     @FutureOrPresent
     private LocalDateTime end;
     @NotNull

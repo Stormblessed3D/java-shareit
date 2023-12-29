@@ -28,6 +28,7 @@ import ru.practicum.shareit.user.UserRepository;
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,7 +57,9 @@ public class ItemServiceImpl implements ItemService {
                 .collect(groupingBy(Comment::getItem));
         List<ItemDtoResponse> itemsWithBookingsAndComments = new ArrayList<>();
         for (Item item : items) {
-            ItemDtoResponse itemDto = ItemMapper.toItemDtoWithBookings(item, comments.get(item), bookings.get(item));
+            ItemDtoResponse itemDto = ItemMapper.toItemDtoWithBookings(item,
+                    comments.getOrDefault(item, Collections.emptyList()),
+                    bookings.getOrDefault(item, Collections.emptyList()));
             itemsWithBookingsAndComments.add(itemDto);
         }
         return itemsWithBookingsAndComments;
@@ -68,7 +71,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDtoResponse getItemById(Long itemId, Long userId) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
-        List<Booking> bookings = bookingRepository.findByItemAndStatus(item, BookingStatus.APPROVED);
+        List<Booking> bookings = bookingRepository.findByItemAndStatus(item, BookingStatus.APPROVED, Sort.by(ASC, "start"));
         List<Comment> comments = commentRepository.findByItem(item);
         if (checkIsOwner(item.getOwner().getId(), userId)) {
             return ItemMapper.toItemDtoWithBookings(item, comments, bookings);
@@ -136,7 +139,9 @@ public class ItemServiceImpl implements ItemService {
                 .collect(groupingBy(Comment::getItem));
         List<ItemDtoResponse> itemsWithComments = new ArrayList<>();
         for (Item item : items) {
-            ItemDtoResponse itemDto = ItemMapper.toItemDtoWithBookings(item, comments.get(item), bookings.get(item));
+            ItemDtoResponse itemDto = ItemMapper.toItemDtoWithBookings(item,
+                    comments.getOrDefault(item, Collections.emptyList()),
+                    bookings.getOrDefault(item, Collections.emptyList()));
             itemsWithComments.add(itemDto);
         }
         return itemsWithComments;
@@ -149,8 +154,8 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId)));
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
-        List<Booking> bookings = bookingRepository.findAllByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
-        if (bookings.size() == 0) {
+        Long count = bookingRepository.countByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
+        if (count == 0) {
             throw new ConstraintViolationException("Комментарий может оставлять только пользователь, бронировавший вещь " +
                     "и только к завершенным бронированиям", null);
         }

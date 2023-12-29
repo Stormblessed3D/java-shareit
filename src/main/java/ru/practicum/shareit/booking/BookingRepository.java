@@ -75,9 +75,16 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
     List<Booking> findAllByItemIdAndBookerIdAndEndBefore(Long itemId, Long userId, LocalDateTime now);
 
+    @Query("select count(*) " +
+            "from Booking as b " +
+            "join b.item as i " +
+            "join b.booker as booker " +
+            "where (b.item.id = ?1) and (b.booker.id = ?2) and (b.end < ?3)")
+    Long countByItemIdAndBookerIdAndEndBefore(Long itemId, Long userId, LocalDateTime now);
+
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
     List<Booking> findByItemInAndStatus(List<Item> items, BookingStatus status, Sort sort);
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
-    List<Booking> findByItemAndStatus(Item item, BookingStatus status);
+    List<Booking> findByItemAndStatus(Item item, BookingStatus status, Sort sort);
 }

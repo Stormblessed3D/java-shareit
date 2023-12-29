@@ -17,11 +17,11 @@ public class UserDto {
     @EqualsAndHashCode.Include
     private Long id;
     @NotBlank(groups = OnCreate.class)
-    @Size(max = 255)
+    @Size(max = 255, groups = {OnCreate.class, OnUpdate.class})
     private String name;
     @Email(groups = {OnCreate.class, OnUpdate.class})
     @NotBlank(groups = OnCreate.class)
-    @Size(max = 255)
+    @Size(max = 255, groups = {OnCreate.class, OnUpdate.class})
     private String email;
 
     public UserDto(long id, String name, String email) {
