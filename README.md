@@ -63,3 +63,6 @@ PATCH /items/{itemId}
 ```
 DELETE /items/{itemId}
 ```
+
+### ER diagram of ShareIt project
+![ER diagram of ShareIt project](https://github.com/Stormblessed3D/java-shareit/blob/add-bookings/ER_diagram_ShareIt.png)

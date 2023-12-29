@@ -19,7 +19,7 @@ public class CommentTrailListener {
         if (comment.getId() == null || comment.getId() == 0) {
             log.info("[COMMENT AUDIT] About to add a comment to database");
         } else {
-            log.info("[COMMENT AUDIT] About to update/delete comment: " + comment.getId());
+            log.info("[COMMENT AUDIT] About to update/delete comment: {}", comment.getId());
         }
     }
 
@@ -27,11 +27,11 @@ public class CommentTrailListener {
     @PostUpdate
     @PostRemove
     private void afterAnyUpdate(Comment comment) {
-        log.info("[COMMENT AUDIT] add/update/delete complete for comment: " + comment.getId());
+        log.info("[COMMENT AUDIT] add/update/delete complete for comment: {}", comment.getId());
     }
 
     @PostLoad
     private void afterLoad(Comment comment) {
-        log.info("[COMMENT AUDIT] comment loaded from database: " + comment.getId());
+        log.info("[COMMENT AUDIT] comment loaded from database: {}", comment.getId());
     }
 }

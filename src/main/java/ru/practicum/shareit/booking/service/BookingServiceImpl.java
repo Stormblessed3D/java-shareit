@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -121,23 +122,28 @@ public class BookingServiceImpl implements BookingService {
         checkUser(ownerId);
         switch (state) {
             case ALL:
-                return BookingMapper.toBookingDtoToReturn(bookingRepository.findAllByItemOwnerIdOrderByStartDesc(ownerId));
+                return BookingMapper.toBookingDtoToReturn(bookingRepository.findAllByItemOwnerIdOrderByStart(ownerId,
+                        Sort.by(Sort.Direction.DESC, "start")));
             case CURRENT:
                 return BookingMapper.toBookingDtoToReturn(
-                        bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(ownerId,
-                                LocalDateTime.now(), LocalDateTime.now()));
+                        bookingRepository.findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStart(ownerId,
+                                LocalDateTime.now(), LocalDateTime.now(), Sort.by(Sort.Direction.DESC, "start")));
             case PAST:
                 return BookingMapper.toBookingDtoToReturn(
-                        bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStartDesc(ownerId, LocalDateTime.now()));
+                        bookingRepository.findAllByItemOwnerIdAndEndBeforeOrderByStart(ownerId, LocalDateTime.now(),
+                                Sort.by(Sort.Direction.DESC, "start")));
             case FUTURE:
                 return BookingMapper.toBookingDtoToReturn(
-                        bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByStartDesc(ownerId, LocalDateTime.now()));
+                        bookingRepository.findAllByItemOwnerIdAndStartAfterOrderByStart(ownerId, LocalDateTime.now(),
+                                Sort.by(Sort.Direction.DESC, "start")));
             case WAITING:
                 return BookingMapper.toBookingDtoToReturn(
-                        bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.WAITING));
+                        bookingRepository.findAllByItemOwnerIdAndStatusOrderByStart(ownerId, BookingStatus.WAITING,
+                                Sort.by(Sort.Direction.DESC, "start")));
             case REJECTED:
                 return BookingMapper.toBookingDtoToReturn(
-                        bookingRepository.findAllByItemOwnerIdAndStatusOrderByStartDesc(ownerId, BookingStatus.REJECTED));
+                        bookingRepository.findAllByItemOwnerIdAndStatusOrderByStart(ownerId, BookingStatus.REJECTED,
+                                Sort.by(Sort.Direction.DESC, "start")));
             default:
                 throw new StatusException("Unknown state: UNSUPPORTED_STATUS");
         }

@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
     @Override
-    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"owner", "request"})
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"owner"})
     List<Item> findAll();
 
-    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"bookings"})
+    @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"owner"})
     List<Item> findByOwnerId(Long userId);
 
     @Query(" select i from Item i " +
