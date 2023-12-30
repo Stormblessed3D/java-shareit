@@ -1,11 +1,11 @@
-package ru.practicum.shareit.item.model;
+package ru.practicum.shareit.comment;
 
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import ru.practicum.shareit.item.ItemTrailListener;
+import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.Column;
@@ -18,33 +18,37 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "items")
+@Table(name = "comments")
 @Data
-@NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
-@EntityListeners(ItemTrailListener.class)
-public class Item {
+@EntityListeners(CommentTrailListener.class)
+@NoArgsConstructor
+public class Comment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "item_id")
+    @Column(name = "comment_id")
     @EqualsAndHashCode.Include
     private Long id;
-    private String name;
-    private String description;
-    private Boolean available;
+    private String text;
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "owner_id", referencedColumnName = "user_id", nullable = false)
+    @JoinColumn(name = "item_id",  referencedColumnName = "item_id", nullable = false)
     @ToString.Exclude
-    private User owner;
+    private Item item;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "author_id", referencedColumnName = "user_id")
+    @ToString.Exclude
+    private User author;
+    private LocalDateTime created;
 
-    public Item(Long id, String name, String description, Boolean available, User owner) {
+    public Comment(Long id, String text, Item item, User author, LocalDateTime created) {
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.available = available;
-        this.owner = owner;
+        this.text = text;
+        this.item = item;
+        this.author = author;
+        this.created = created;
     }
 }

@@ -8,36 +8,50 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import javax.validation.ConstraintViolationException;
-import java.util.Map;
+import javax.validation.ValidationException;
 
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class, ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Map<String, String> handle(RuntimeException e) {
+    public ErrorResponse handle(RuntimeException e) {
         log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);
-        return Map.of("Ошибка валидации", e.getMessage());
+        return new ErrorResponse("Ошибка валидации", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handle(UnavailableItemException e) {
+        log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);
+        return new ErrorResponse("Ошибка бронирования", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Map<String, String> handle(EntityNotFoundException e) {
+    public ErrorResponse handle(EntityNotFoundException e) {
         log.warn("Получен статус 404 Not found {}", e.getMessage(), e);
-        return Map.of("Объект не найден", e.getMessage());
+        return new ErrorResponse("Объект не найден", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public Map<String, String> handle(InvalidEmailException e) {
+    public ErrorResponse handle(InvalidEmailException e) {
         log.warn("Получен статус 409 Conflict {}", e.getMessage(), e);
-        return Map.of("Ошибка валидации", e.getMessage());
+        return new ErrorResponse("Ошибка валидации", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handle(StatusException e) {
+        log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);
+        return new ErrorResponse("Unknown state: UNSUPPORTED_STATUS", e.getMessage());
     }
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public Map<String, String> handle(Throwable e) {
+    public ErrorResponse handle(Throwable e) {
         log.warn("Получен статус 500 Internal ServerError {}", e.getMessage(), e);
-        return Map.of("Внутренняя ошибка сервера", e.getMessage());
+        return new ErrorResponse("Внутренняя ошибка сервера", e.getMessage());
     }
 }
