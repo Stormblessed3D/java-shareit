@@ -16,6 +16,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "requests")
@@ -23,7 +24,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
-public class ItemRequest {
+public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "request_id")
@@ -34,11 +35,18 @@ public class ItemRequest {
     @JoinColumn(name =  "requestor_id", referencedColumnName = "user_id")
     @ToString.Exclude
     private User requestor;
-    /*private LocalDateTime created;*/
+    private LocalDateTime created;
 
-    public ItemRequest(long id, String description, User requestor) {
+    public Request(long id, String description, User requestor, LocalDateTime created) {
         this.id = id;
         this.description = description;
         this.requestor = requestor;
+        this.created = created;
+    }
+
+    public Request(String description, User requestor, LocalDateTime created) {
+        this.description = description;
+        this.requestor = requestor;
+        this.created = created;
     }
 }

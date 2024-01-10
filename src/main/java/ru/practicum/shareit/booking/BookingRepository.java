@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,55 +16,81 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
-    Iterable<Booking> findAllByBookerIdOrderByStartDesc(Long bookerId);
+    Page<Booking> findAllByBookerIdOrderByStartDesc(Long bookerId, Pageable pageable);
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
-    List<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long bookerId, LocalDateTime now1, LocalDateTime now2);
+    Page<Booking> findAllByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(Long bookerId, LocalDateTime now1,
+                                                                             LocalDateTime now2, Pageable pageable);
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
-    List<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime now);
+    Page<Booking> findAllByBookerIdAndEndBeforeOrderByStartDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
-    List<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(Long bookerId, LocalDateTime now);
+    Page<Booking> findAllByBookerIdAndStartAfterOrderByStartDesc(Long bookerId, LocalDateTime now, Pageable pageable);
 
     @EntityGraph(type = EntityGraph.EntityGraphType.FETCH, attributePaths = {"item", "booker"})
-    List<Booking> findAllByBookerIdAndStatusOrderByStartDesc(Long bookerId, BookingStatus status);
+    Page<Booking> findAllByBookerIdAndStatusOrderByStartDesc(Long bookerId, BookingStatus status, Pageable pageable);
 
-    @Query("select bkng " +
+    @Query(value = "select bkng " +
+                    "from Booking as bkng " +
+                    "join fetch bkng.item as i " +
+                    "join fetch bkng.booker as booker " +
+                    "where i.owner.id = ?1 ",
+            countQuery = "select count(bkng) " +
+                    "from Booking as bkng " +
+                    "join bkng.item as i " +
+                    "join bkng.booker as booker " +
+                    "where i.owner.id = ?1")
+    Page<Booking> findAllByItemOwnerIdOrderByStart(Long ownerId, Pageable pageable);
+
+    @Query(value = "select bkng " +
+                    "from Booking as bkng " +
+                    "join bkng.item as i " +
+                    "join bkng.booker as booker " +
+                    "where (i.owner.id = ?1) and (bkng.start < ?2) and (bkng.end > ?3)",
+            countQuery = "select count(bkng) " +
+                    "from Booking as bkng " +
+                    "join bkng.item as i " +
+                    "join bkng.booker as booker " +
+                    "where (i.owner.id = ?1) and (bkng.start < ?2) and (bkng.end > ?3)")
+    Page<Booking> findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStart(Long ownerId, LocalDateTime now1,
+                                                                            LocalDateTime now2, Pageable pageable);
+
+    @Query(value = "select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where i.owner.id = ?1 ")
-    List<Booking> findAllByItemOwnerIdOrderByStart(Long ownerId, Sort sort);
-
-    @Query("select bkng " +
+            "where (i.owner.id = ?1) and (bkng.end < ?2)",
+    countQuery = "select count(bkng) " +
             "from Booking as bkng " +
-            "join fetch bkng.item as i " +
-            "join fetch bkng.booker as booker " +
-            "where (i.owner.id = ?1) and (bkng.start < ?2) and (bkng.end > ?3)")
-    List<Booking> findAllByItemOwnerIdAndStartBeforeAndEndAfterOrderByStart(Long ownerId, LocalDateTime now1,
-                                                                            LocalDateTime now2, Sort sort);
-
-    @Query("select bkng " +
-            "from Booking as bkng " +
-            "join fetch bkng.item as i " +
-            "join fetch bkng.booker as booker " +
+            "join bkng.item as i " +
+            "join bkng.booker as booker " +
             "where (i.owner.id = ?1) and (bkng.end < ?2)")
-    List<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStart(Long ownerId, LocalDateTime now, Sort sort);
+    Page<Booking> findAllByItemOwnerIdAndEndBeforeOrderByStart(Long ownerId, LocalDateTime now, Pageable pageable);
 
-    @Query("select bkng " +
+    @Query(value = "select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
+            "where (i.owner.id = ?1) and (bkng.start > ?2)",
+    countQuery = "select bkng " +
+            "from Booking as bkng " +
+            "join bkng.item as i " +
+            "join bkng.booker as booker " +
             "where (i.owner.id = ?1) and (bkng.start > ?2)")
-    List<Booking> findAllByItemOwnerIdAndStartAfterOrderByStart(Long ownerId, LocalDateTime now, Sort sort);
+    Page<Booking> findAllByItemOwnerIdAndStartAfterOrderByStart(Long ownerId, LocalDateTime now, Pageable pageable);
 
-    @Query("select bkng " +
+    @Query(value = "select bkng " +
             "from Booking as bkng " +
             "join fetch bkng.item as i " +
             "join fetch bkng.booker as booker " +
-            "where (i.owner.id = ?1) and (bkng.status = ?2)")
-    List<Booking> findAllByItemOwnerIdAndStatusOrderByStart(Long ownerId, BookingStatus status, Sort sort);
+            "where (i.owner.id = ?1) and (bkng.status = ?2)",
+    countQuery = "select bkng " +
+            "from Booking as bkng " +
+            "join bkng.item as i " +
+            "join bkng.booker as booker " +
+            "where (i.owner.id = ?1) and (bkng.start > ?2)")
+    Page<Booking> findAllByItemOwnerIdAndStatusOrderByStart(Long ownerId, BookingStatus status, Pageable pageable);
 
     @Query(value = "select count(*) " +
             "from bookings as b " +

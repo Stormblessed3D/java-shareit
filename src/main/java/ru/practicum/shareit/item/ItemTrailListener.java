@@ -16,7 +16,7 @@ public class ItemTrailListener {
     @PrePersist
     @PreUpdate
     @PreRemove
-    private void beforeAnyUpdate(Item item) {
+    protected void beforeAnyUpdate(Item item) {
         if (item.getId() == null || item.getId() == 0) {
             log.info("[ITEM AUDIT] About to add a item to database");
         } else {
@@ -27,12 +27,12 @@ public class ItemTrailListener {
     @PostPersist
     @PostUpdate
     @PostRemove
-    private void afterAnyUpdate(Item item) {
+    protected void afterAnyUpdate(Item item) {
         log.info("[ITEM AUDIT] add/update/delete complete for item: {}", item.getId());
     }
 
     @PostLoad
-    private void afterLoad(Item item) {
+    protected void afterLoad(Item item) {
         log.info("[ITEM AUDIT] item loaded from database: {}", item.getId());
     }
 }

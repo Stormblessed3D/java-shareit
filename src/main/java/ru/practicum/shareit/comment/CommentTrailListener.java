@@ -15,7 +15,7 @@ public class CommentTrailListener {
     @PrePersist
     @PreUpdate
     @PreRemove
-    private void beforeAnyUpdate(Comment comment) {
+    protected void beforeAnyUpdate(Comment comment) {
         if (comment.getId() == null || comment.getId() == 0) {
             log.info("[COMMENT AUDIT] About to add a comment to database");
         } else {
@@ -26,12 +26,12 @@ public class CommentTrailListener {
     @PostPersist
     @PostUpdate
     @PostRemove
-    private void afterAnyUpdate(Comment comment) {
+    protected void afterAnyUpdate(Comment comment) {
         log.info("[COMMENT AUDIT] add/update/delete complete for comment: {}", comment.getId());
     }
 
     @PostLoad
-    private void afterLoad(Comment comment) {
+    protected void afterLoad(Comment comment) {
         log.info("[COMMENT AUDIT] comment loaded from database: {}", comment.getId());
     }
 }

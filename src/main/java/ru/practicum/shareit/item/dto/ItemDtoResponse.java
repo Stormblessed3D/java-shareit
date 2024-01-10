@@ -22,6 +22,7 @@ public class ItemDtoResponse {
     private BookingForItemDto lastBooking;
     private BookingForItemDto nextBooking;
     private List<CommentDtoResponse> comments;
+    private Long requestId;
 
     public ItemDtoResponse(long id, String name, String description, Boolean available) {
         this.id = id;
@@ -39,5 +40,17 @@ public class ItemDtoResponse {
         this.lastBooking = lastBooking;
         this.nextBooking = nextBooking;
         this.comments = comments;
+    }
+
+    public ItemDtoResponse(long id, String name, String description, Boolean available, BookingForItemDto lastBooking,
+                           BookingForItemDto nextBooking, List<CommentDtoResponse> comments, Long requestId) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.lastBooking = lastBooking;
+        this.nextBooking = nextBooking;
+        this.comments = comments;
+        this.requestId = requestId;
     }
 }

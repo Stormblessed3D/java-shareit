@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import ru.practicum.shareit.item.ItemTrailListener;
+import ru.practicum.shareit.request.Request;
 import ru.practicum.shareit.user.User;
 
 import javax.persistence.Column;
@@ -39,6 +40,10 @@ public class Item {
     @JoinColumn(name = "owner_id", referencedColumnName = "user_id", nullable = false)
     @ToString.Exclude
     private User owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "request_id", referencedColumnName = "request_id")
+    @ToString.Exclude
+    private Request request;
 
     public Item(Long id, String name, String description, Boolean available, User owner) {
         this.id = id;
@@ -46,5 +51,14 @@ public class Item {
         this.description = description;
         this.available = available;
         this.owner = owner;
+    }
+
+    public Item(Long id, String name, String description, Boolean available, User owner, Request request) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.available = available;
+        this.owner = owner;
+        this.request = request;
     }
 }
