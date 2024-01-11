@@ -13,6 +13,8 @@ import ru.practicum.shareit.booking.model.BookingStatusState;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
+
 import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,7 +56,7 @@ class BookingControllerTest {
         when(bookingService.getBookingById(bookingId, userId)).thenReturn(expectedBooking);
 
         String response = mockMvc.perform(get("/bookings/{bookingId}", bookingId)
-                .header("X-Sharer-User-Id", userId))
+                .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -72,7 +74,7 @@ class BookingControllerTest {
         when(bookingService.getBookingById(bookingId, userId)).thenThrow(EntityNotFoundException.class);
 
         mockMvc.perform(get("/bookings/{bookingId}", bookingId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
 
@@ -87,7 +89,7 @@ class BookingControllerTest {
         BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
 
        mockMvc.perform(get("/bookings/{bookingId}", bookingId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isBadRequest())
                         .andExpect(result -> assertTrue(result.getResolvedException() instanceof ValidationException));
 
@@ -102,7 +104,7 @@ class BookingControllerTest {
         when(bookingService.createBooking(bookingDtoReceived, userId)).thenReturn(expectedBooking);
 
         String response = mockMvc.perform(post("/bookings")
-                    .header("X-Sharer-User-Id", userId)
+                    .header(USER_REQUEST_HEADER, userId)
                     .contentType("application/json")
                     .content(objectMapper.writeValueAsString(bookingDtoReceived)))
                 .andExpect(status().isOk())
@@ -126,7 +128,7 @@ class BookingControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(bookingDtoReceived)))
                 .andExpect(status().isBadRequest());
@@ -148,7 +150,7 @@ class BookingControllerTest {
         BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
 
         mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(bookingDtoReceived)))
                 .andExpect(status().isBadRequest());
@@ -170,7 +172,7 @@ class BookingControllerTest {
         BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
 
         mockMvc.perform(post("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(bookingDtoReceived)))
                 .andExpect(status().isBadRequest());
@@ -187,7 +189,7 @@ class BookingControllerTest {
         when(bookingService.approveBooking(bookingId, true, userId)).thenReturn(expectedBooking);
 
         String response = mockMvc.perform(patch("/bookings/{bookingId}", bookingId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("approved", "true"))
                         .andExpect(status().isOk())
                         .andReturn()
@@ -207,7 +209,7 @@ class BookingControllerTest {
                 anyInt())).thenReturn(expectedBookings);
 
         String response = mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -223,7 +225,7 @@ class BookingControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "-1")
                         .param("size", "-1"))
                 .andExpect(status().isBadRequest());
@@ -237,7 +239,7 @@ class BookingControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/bookings")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "0")
                         .param("size", "101"))
                 .andExpect(status().isBadRequest());
@@ -254,7 +256,7 @@ class BookingControllerTest {
                 anyInt())).thenReturn(expectedBookings);
 
         String response = mockMvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", ownerId))
+                        .header(USER_REQUEST_HEADER, ownerId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -270,7 +272,7 @@ class BookingControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "-1")
                         .param("size", "-1"))
                 .andExpect(status().isBadRequest());
@@ -284,7 +286,7 @@ class BookingControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/bookings/owner")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "0")
                         .param("size", "101"))
                 .andExpect(status().isBadRequest());

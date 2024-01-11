@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.shareit.request.dto.RequestDtoPost;
 import ru.practicum.shareit.request.dto.RequestDtoResponse;
 
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -26,7 +28,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RequestController {
     private final RequestService requestService;
-    private static final String USER_REQUEST_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ResponseEntity<RequestDtoResponse> createRequest(@Valid @RequestBody RequestDtoPost requestDtoPost,

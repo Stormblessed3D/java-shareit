@@ -23,13 +23,14 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
+
 @RestController
 @RequestMapping(path = "/bookings")
 @Validated
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
-    private static final String USER_REQUEST_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ResponseEntity<BookingDtoToReturn> createBooking(@Valid @RequestBody BookingDtoReceived bookingDtoReceived,

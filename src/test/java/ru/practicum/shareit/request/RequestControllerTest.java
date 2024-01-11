@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 
 @WebMvcTest(controllers = RequestController.class)
 class RequestControllerTest {
@@ -44,7 +45,7 @@ class RequestControllerTest {
         when(requestService.createRequest(requestDtoPost, userId)).thenReturn(expectedDtoResponse);
 
         String response = mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestDtoPost)))
                 .andExpect(status().isOk())
@@ -65,7 +66,7 @@ class RequestControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/requests")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(requestDtoPost)))
                 .andExpect(status().isBadRequest());
@@ -81,7 +82,7 @@ class RequestControllerTest {
         when(requestService.getAllRequests(anyLong())).thenReturn(expectedDtoResponses);
 
         String response = mockMvc.perform(get("/requests")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -100,7 +101,7 @@ class RequestControllerTest {
         when(requestService.getRequestById(anyLong(), anyLong())).thenReturn(expectedDtoResponse);
 
         String response = mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -118,7 +119,7 @@ class RequestControllerTest {
         when(requestService.getRequestById(anyLong(), anyLong())).thenThrow(EntityNotFoundException.class);
 
         mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
 
@@ -132,7 +133,7 @@ class RequestControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isBadRequest());
 
         verify(requestService, never()).getRequestById(anyLong(), anyLong());
@@ -146,7 +147,7 @@ class RequestControllerTest {
         when(requestService.getAllByPages(anyInt(), anyInt(), anyLong())).thenReturn(expectedDtoResponses);
 
         String response = mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -162,7 +163,7 @@ class RequestControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "-1")
                         .param("size", "-1"))
                 .andExpect(status().isBadRequest());
@@ -178,7 +179,7 @@ class RequestControllerTest {
         when(requestService.getAllByPages(anyInt(), anyInt(), anyLong())).thenReturn(expectedDtoResponses);
 
         mockMvc.perform(get("/requests/all")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "0")
                         .param("size", "101"))
                 .andExpect(status().isBadRequest());

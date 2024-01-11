@@ -21,6 +21,8 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.validator.OnCreate;
 import ru.practicum.shareit.user.validator.OnUpdate;
 
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
+
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -33,7 +35,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private static final String USER_REQUEST_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
     public ResponseEntity<List<ItemDtoResponse>> getItems(@RequestParam(defaultValue = "0") @Min(value = 0L) Integer from,

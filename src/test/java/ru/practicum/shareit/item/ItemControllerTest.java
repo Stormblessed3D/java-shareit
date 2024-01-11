@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 
 @WebMvcTest(controllers = ItemController.class)
 class ItemControllerTest {
@@ -56,7 +57,7 @@ class ItemControllerTest {
         when(itemService.getItems(anyLong(), anyInt(), anyInt())).thenReturn(expectedItems);
 
         String response = mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -72,7 +73,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "-1")
                         .param("size", "-1"))
                 .andExpect(status().isBadRequest());
@@ -88,7 +89,7 @@ class ItemControllerTest {
         when(itemService.getItems(anyLong(), anyInt(), anyInt())).thenReturn(expectedItems);
 
         mockMvc.perform(get("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("from", "0")
                         .param("size", "101"))
                 .andExpect(status().isBadRequest());
@@ -105,7 +106,7 @@ class ItemControllerTest {
         when(itemService.getItemById(anyLong(), anyLong())).thenReturn(expectedItem);
 
         String response = mockMvc.perform(get("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -123,7 +124,7 @@ class ItemControllerTest {
         when(itemService.getItemById(anyLong(), anyLong())).thenThrow(EntityNotFoundException.class);
 
         mockMvc.perform(get("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isNotFound())
                 .andExpect(result -> assertTrue(result.getResolvedException() instanceof EntityNotFoundException));
 
@@ -138,7 +139,7 @@ class ItemControllerTest {
         when(itemService.search(anyString(), anyInt(), anyInt())).thenReturn(expectedItems);
 
         String response = mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("text", "text"))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -155,7 +156,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(get("/items/search")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .param("text", "")
                         .param("from", "-1")
                         .param("size", "-1"))
@@ -172,7 +173,7 @@ class ItemControllerTest {
         when(itemService.createItem(itemDtoRequest, userId)).thenReturn(expectedItem);
 
         String response = mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(itemDtoRequest)))
                 .andExpect(status().isOk())
@@ -197,7 +198,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidItemDtoRequest)))
                 .andExpect(status().isBadRequest());
@@ -218,7 +219,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidItemDtoRequest)))
                 .andExpect(status().isBadRequest());
@@ -239,7 +240,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidItemDtoRequest)))
                 .andExpect(status().isBadRequest());
@@ -260,7 +261,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/items")
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(invalidItemDtoRequest)))
                 .andExpect(status().isBadRequest());
@@ -277,7 +278,7 @@ class ItemControllerTest {
         when(itemService.updateItem(itemDtoRequest, itemId, userId)).thenReturn(expectedItem);
 
         String response = mockMvc.perform(patch("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(itemDtoRequest)))
                 .andExpect(status().isOk())
@@ -296,7 +297,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(patch("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(itemDtoRequest)))
                 .andExpect(status().isBadRequest());
@@ -318,7 +319,7 @@ class ItemControllerTest {
                 .build();
 
         mockMvc.perform(patch("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(itemDtoRequest)))
                 .andExpect(status().isBadRequest());
@@ -334,7 +335,7 @@ class ItemControllerTest {
         when(itemService.updateItem(itemDtoRequest, itemId, userId)).thenThrow(EntityNotFoundException.class);
 
         mockMvc.perform(patch("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(itemDtoRequest)))
                 .andExpect(status().isNotFound())
@@ -350,7 +351,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(delete("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                         .andExpect(status().isNoContent());
 
         verify(itemService).deleteItem(anyLong(), anyLong());
@@ -364,7 +365,7 @@ class ItemControllerTest {
         doThrow(EntityNotFoundException.class).when(itemService).deleteItem(anyLong(), anyLong());
 
         mockMvc.perform(delete("/items/{itemId}", itemId)
-                        .header("X-Sharer-User-Id", userId))
+                        .header(USER_REQUEST_HEADER, userId))
                 .andExpect(status().isNotFound());
 
         verify(itemService).deleteItem(anyLong(), anyLong());
@@ -382,7 +383,7 @@ class ItemControllerTest {
         when(itemService.createComment(commentDtoRequest, itemId, userId)).thenReturn(expectedCommentDtoResponse);
 
         String response = mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(commentDtoRequest)))
                 .andExpect(status().isOk())
@@ -404,7 +405,7 @@ class ItemControllerTest {
         Long userId = 1L;
 
         mockMvc.perform(post("/items/{itemId}/comment", itemId)
-                        .header("X-Sharer-User-Id", userId)
+                        .header(USER_REQUEST_HEADER, userId)
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(commentDtoRequest)))
                 .andExpect(status().isBadRequest());
