@@ -8,11 +8,14 @@ import ru.practicum.shareit.comment.Comment;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
+import ru.practicum.shareit.item.dto.ItemDtoResponseWithRequestId;
 import ru.practicum.shareit.item.dto.ItemForBookingDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.Request;
 import ru.practicum.shareit.user.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +30,9 @@ public class ItemMapper {
                 .available(item.getAvailable())
                 .build();
         itemDtoResponse.setComments(CommentMapper.toCommentDto(comments));
+        if (item.getRequest() != null) {
+            itemDtoResponse.setRequestId(item.getRequest().getId());
+        }
         return itemDtoResponse;
     }
 
@@ -37,6 +43,9 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .available(item.getAvailable())
                 .build();
+        if (item.getRequest() != null) {
+            itemDtoResponse.setRequestId(item.getRequest().getId());
+        }
         if (bookings.size() != 0) {
             Optional<Booking> nextBooking = bookings.stream()
                     .filter(b -> b.getStart().isAfter(LocalDateTime.now()))
@@ -69,12 +78,37 @@ public class ItemMapper {
                 .build();
     }
 
-    public static Item toItem(ItemDtoRequest itemDtoRequest, User owner) {
-        return Item.builder()
+    public static ItemDtoResponseWithRequestId toItemDtoResponseWithRequestId(Item item) {
+        ItemDtoResponseWithRequestId itemDto = ItemDtoResponseWithRequestId.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .build();
+        if (item.getRequest() != null) {
+            itemDto.setRequestId(item.getRequest().getId());
+        }
+        return itemDto;
+    }
+
+    public static List<ItemDtoResponseWithRequestId> toItemDtoResponseWithRequestId(Iterable<Item> items) {
+        List<ItemDtoResponseWithRequestId> dtos = new ArrayList<>();
+        for (Item item : items) {
+            dtos.add(toItemDtoResponseWithRequestId(item));
+        }
+        return dtos;
+    }
+
+    public static Item toItem(ItemDtoRequest itemDtoRequest, User owner, Request request) {
+        Item item = Item.builder()
                 .name(itemDtoRequest.getName())
                 .description(itemDtoRequest.getDescription())
                 .available(itemDtoRequest.getAvailable())
                 .owner(owner)
                 .build();
+        if (request != null) {
+            item.setRequest(request);
+        }
+        return item;
     }
 }

@@ -35,13 +35,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handle(InvalidEmailException e) {
-        log.warn("Получен статус 409 Conflict {}", e.getMessage(), e);
-        return new ErrorResponse("Ошибка валидации", e.getMessage());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle(StatusException e) {
         log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);

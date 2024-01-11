@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.dto;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.practicum.shareit.user.validator.OnCreate;
 import ru.practicum.shareit.user.validator.OnUpdate;
 
@@ -13,6 +14,7 @@ import javax.validation.constraints.Size;
 @Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
+@NoArgsConstructor
 public class UserDto {
     @EqualsAndHashCode.Include
     private Long id;

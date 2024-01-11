@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -31,5 +33,16 @@ public class BookingDtoToReturn {
         this.status = status;
         this.booker = booker;
         this.item = item;
+    }
+
+    @JsonCreator
+    public BookingDtoToReturn(@JsonProperty("id") Long id, @JsonProperty("start") LocalDateTime start,
+                              @JsonProperty("end") LocalDateTime end, @JsonProperty("status") BookingStatus status,
+                              @JsonProperty("booker") UserForBookingDto booker) {
+        this.id = id;
+        this.start = start;
+        this.end = end;
+        this.status = status;
+        this.booker = booker;
     }
 }

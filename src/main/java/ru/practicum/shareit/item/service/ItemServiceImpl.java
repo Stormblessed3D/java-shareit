@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -22,6 +23,8 @@ import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.Request;
+import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
@@ -44,12 +47,15 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final RequestRepository requestRepository;
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public List<ItemDtoResponse> getItems(Long ownerId) {
+    public List<ItemDtoResponse> getItems(Long ownerId, Integer from, Integer size) {
         checkUser(ownerId);
-        List<Item> items = itemRepository.findByOwnerId(ownerId);
+        int page = from / size;
+        List<Item> items = itemRepository.findByOwnerId(ownerId,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
         Map<Item, List<Booking>> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED,
                         Sort.by(ASC, "start")).stream()
                 .collect(groupingBy(Booking::getItem));
@@ -85,8 +91,15 @@ public class ItemServiceImpl implements ItemService {
     public ItemDtoResponse createItem(ItemDtoRequest itemDtoRequest, Long ownerId) {
         User owner = userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", ownerId)));
-        Item item = itemRepository.save(ItemMapper.toItem(itemDtoRequest, owner));
-        return ItemMapper.toItemDtoWithoutBookings(item, List.of());
+        if (itemDtoRequest.getRequestId() != null) {
+            Request request = requestRepository.findById(itemDtoRequest.getRequestId())
+                    .orElseThrow(() -> new EntityNotFoundException(String.format("Запрос с id %d не найден", itemDtoRequest.getRequestId())));
+            Item item = itemRepository.save(ItemMapper.toItem(itemDtoRequest, owner, request));
+            return ItemMapper.toItemDtoWithoutBookings(item, List.of());
+        } else {
+            Item item = itemRepository.save(ItemMapper.toItem(itemDtoRequest, owner, null));
+            return ItemMapper.toItemDtoWithoutBookings(item, List.of());
+        }
     }
 
     @Override
@@ -127,11 +140,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public List<ItemDtoResponse> search(String text) {
+    public List<ItemDtoResponse> search(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return List.of();
         }
-        List<Item> items = itemRepository.findByNameOrDescriptionContainingIgnoreCase(text);
+        int page = from / size;
+        List<Item> items = itemRepository.findByNameOrDescriptionContainingIgnoreCase(text,
+                PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "id")));
         Map<Item, List<Booking>> bookings = bookingRepository.findByItemInAndStatus(items, BookingStatus.APPROVED,
                         Sort.by(ASC, "start")).stream()
                 .collect(groupingBy(Booking::getItem));

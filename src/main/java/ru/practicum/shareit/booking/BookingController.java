@@ -18,8 +18,12 @@ import ru.practicum.shareit.booking.model.BookingStatusState;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import java.util.List;
+
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -27,7 +31,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class BookingController {
     private final BookingService bookingService;
-    private static final String USER_REQUEST_HEADER = "X-Sharer-User-Id";
 
     @PostMapping
     public ResponseEntity<BookingDtoToReturn> createBooking(@Valid @RequestBody BookingDtoReceived bookingDtoReceived,
@@ -37,26 +40,32 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<BookingDtoToReturn> approveBooking(@PathVariable @Positive Long bookingId,
-                                                     @RequestParam(value = "approved") Boolean isApproved,
-                                                     @RequestHeader(USER_REQUEST_HEADER) Long userId) {
+                                                             @RequestParam(value = "approved") Boolean isApproved,
+                                                             @RequestHeader(USER_REQUEST_HEADER) Long userId) {
         return ResponseEntity.ok(bookingService.approveBooking(bookingId, isApproved, userId));
     }
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<BookingDtoToReturn> getBookingById(@PathVariable @Positive Long bookingId,
-                                                     @RequestHeader(USER_REQUEST_HEADER) Long userId) {
+                                                             @RequestHeader(USER_REQUEST_HEADER) Long userId) {
         return ResponseEntity.ok(bookingService.getBookingById(bookingId, userId));
     }
 
     @GetMapping
-    public ResponseEntity<List<BookingDtoToReturn>> getAllBookingsByUser(@RequestParam(defaultValue = "ALL") BookingStatusState state,
-                                                                 @RequestHeader(USER_REQUEST_HEADER) Long userId) {
-        return ResponseEntity.ok(bookingService.getAllBookingsByUser(userId, state));
+    public ResponseEntity<List<BookingDtoToReturn>> getAllBookingsByUser(
+            @RequestParam(defaultValue = "ALL") BookingStatusState state,
+            @RequestParam(defaultValue = "0") @Min(value = 0L) Integer from,
+            @RequestParam(defaultValue = "10") @Positive @Max(value = 100) Integer size,
+            @RequestHeader(USER_REQUEST_HEADER) Long userId) {
+        return ResponseEntity.ok(bookingService.getAllBookingsByUser(userId, state, from, size));
     }
 
     @GetMapping("/owner")
-    public ResponseEntity<List<BookingDtoToReturn>> getAllBookingsByOwner(@RequestParam(defaultValue = "ALL") BookingStatusState state,
-                                                                  @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
-        return ResponseEntity.ok(bookingService.getAllBookingsByOwner(ownerId, state));
+    public ResponseEntity<List<BookingDtoToReturn>> getAllBookingsByOwner(
+            @RequestParam(defaultValue = "ALL") BookingStatusState state,
+            @RequestParam(defaultValue = "0") @Min(value = 0L) Integer from,
+            @RequestParam(defaultValue = "10") @Positive @Max(value = 100) Integer size,
+            @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
+        return ResponseEntity.ok(bookingService.getAllBookingsByOwner(ownerId, state, from, size));
     }
 }

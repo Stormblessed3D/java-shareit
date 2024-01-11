@@ -19,8 +19,13 @@ import ru.practicum.shareit.item.dto.ItemDtoRequest;
 import ru.practicum.shareit.item.dto.ItemDtoResponse;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.validator.OnCreate;
+import ru.practicum.shareit.user.validator.OnUpdate;
+
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -30,11 +35,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ItemController {
     private final ItemService itemService;
-    private static final String USER_REQUEST_HEADER = "X-Sharer-User-Id";
 
     @GetMapping
-    public ResponseEntity<List<ItemDtoResponse>> getItems(@RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
-        return ResponseEntity.ok(itemService.getItems(ownerId));
+    public ResponseEntity<List<ItemDtoResponse>> getItems(@RequestParam(defaultValue = "0") @Min(value = 0L) Integer from,
+                                                          @RequestParam(defaultValue = "10") @Positive @Max(value = 100) Integer size,
+                                                          @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
+        return ResponseEntity.ok(itemService.getItems(ownerId, from, size));
     }
 
     @GetMapping("/{itemId}")
@@ -44,8 +50,10 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDtoResponse>> search(@RequestParam String text) {
-        return ResponseEntity.ok(itemService.search(text));
+    public ResponseEntity<List<ItemDtoResponse>> search(@RequestParam String text,
+                                                        @RequestParam(defaultValue = "0") @Min(value = 0L) Integer from,
+                                                        @RequestParam(defaultValue = "10") @Positive @Max(value = 100) Integer size) {
+        return ResponseEntity.ok(itemService.search(text, from, size));
     }
 
     @PostMapping
@@ -55,7 +63,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemDtoResponse> updateItem(@Valid @RequestBody ItemDtoRequest itemDtoRequest,
+    public ResponseEntity<ItemDtoResponse> updateItem(@Validated({OnUpdate.class})  @RequestBody ItemDtoRequest itemDtoRequest,
                                                       @PathVariable @Positive Long itemId,
                                                       @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
         return ResponseEntity.ok(itemService.updateItem(itemDtoRequest, itemId, ownerId));
@@ -63,7 +71,7 @@ public class ItemController {
 
     @DeleteMapping("/{itemId}")
     public ResponseEntity<Void> deleteItem(@PathVariable @Positive Long itemId,
-                           @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
+                                           @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
         itemService.deleteItem(itemId, ownerId);
         return ResponseEntity.noContent().build();
     }

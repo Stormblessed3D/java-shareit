@@ -15,7 +15,7 @@ public class UserTrailListener {
     @PrePersist
     @PreUpdate
     @PreRemove
-    private void beforeAnyUpdate(User user) {
+    protected void beforeAnyUpdate(User user) {
         if (user.getId() == null || user.getId() == 0) {
             log.info("[USER AUDIT] About to add a user to database");
         } else {
@@ -26,12 +26,12 @@ public class UserTrailListener {
     @PostPersist
     @PostUpdate
     @PostRemove
-    private void afterAnyUpdate(User user) {
+    protected void afterAnyUpdate(User user) {
         log.info("[USER AUDIT] add/update/delete complete for user: {}", user.getId());
     }
 
     @PostLoad
-    private void afterLoad(User user) {
+    protected void afterLoad(User user) {
         log.info("[USER AUDIT] user loaded from database: {}", user.getId());
     }
 }

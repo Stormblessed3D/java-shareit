@@ -16,7 +16,7 @@ public class BookingTrailListener {
     @PrePersist
     @PreUpdate
     @PreRemove
-    private void beforeAnyUpdate(Booking booking) {
+    protected void beforeAnyUpdate(Booking booking) {
         if (booking.getId() == null || booking.getId() == 0) {
             log.info("[BOOKING AUDIT] About to add a booking to database");
         } else {
@@ -27,12 +27,12 @@ public class BookingTrailListener {
     @PostPersist
     @PostUpdate
     @PostRemove
-    private void afterAnyUpdate(Booking booking) {
+    protected void afterAnyUpdate(Booking booking) {
         log.info("[BOOKING AUDIT] add/update/delete complete for booking: {}", booking.getId());
     }
 
     @PostLoad
-    private void afterLoad(Booking booking) {
+    protected void afterLoad(Booking booking) {
         log.info("[BOOKING AUDIT] booking loaded from database: {}", booking.getId());
     }
 }
