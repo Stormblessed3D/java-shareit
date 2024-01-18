@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -120,55 +119,6 @@ class UserControllerTest {
         verify(userService).updateUser(userDto, userId);
     }
 
-    @Test
-    @SneakyThrows
-    void updateUser_whenUserIdIsNegative_thenResponseStatusIsBadRequest() {
-        Long userId = -1L;
-
-        mockMvc.perform(patch("/users/{userId}", userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(userDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).updateUser(userDto, userId);
-    }
-
-    @Test
-    @SneakyThrows
-    void updateUser_whenNameIsOver255Symbols_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("name".repeat(256))
-                .email("email@gmail.com")
-                .build();
-        Long userId = 1L;
-
-        mockMvc.perform(patch("/users/{userId}", userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).updateUser(userDto, userId);
-    }
-
-    @Test
-    @SneakyThrows
-    void updateUser_whenEmailIsInvalid_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("name")
-                .email("emailgmail.com")
-                .build();
-        Long userId = 1L;
-
-        mockMvc.perform(patch("/users/{userId}", userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).updateUser(invalidUserDto, userId);
-    }
-
     @SneakyThrows
     @Test
     void createUser_whenInvoked_thenResponseStatusOkWithListOfUserDtoInBody() {
@@ -184,91 +134,6 @@ class UserControllerTest {
 
         verify(userService).createUser(userDto);
         assertEquals(objectMapper.writeValueAsString(userDto), response);
-    }
-
-    @Test
-    @SneakyThrows
-    void createUser_whenEmailIsInvalid_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("name")
-                .email("emailgmail.com")
-                .build();
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).createUser(invalidUserDto);
-    }
-
-    @Test
-    @SneakyThrows
-    void createUser_whenNameIsBlank_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("")
-                .email("email@gmail.com")
-                .build();
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).createUser(invalidUserDto);
-    }
-
-    @Test
-    @SneakyThrows
-    void createUser_whenEmailIsBlank_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("name")
-                .email("")
-                .build();
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).createUser(invalidUserDto);
-    }
-
-    @Test
-    @SneakyThrows
-    void createUser_whenNameIsOver255Symbols_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("name".repeat(256))
-                .email("email@gmail.com")
-                .build();
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).createUser(invalidUserDto);
-    }
-
-    @Test
-    @SneakyThrows
-    void createUser_whenEmailIsOver255Symbols_thenStatusIsBadRequest() {
-        UserDto invalidUserDto = UserDto.builder()
-                .id(1L)
-                .name("name")
-                .email("email@gmail.com".repeat(256))
-                .build();
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(invalidUserDto)))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).createUser(invalidUserDto);
     }
 
     @SneakyThrows
@@ -292,16 +157,5 @@ class UserControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(userService).deleteUser(anyLong());
-    }
-
-    @SneakyThrows
-    @Test
-    void deleteUser_whenUserIdIsNegative_thenResponseStatusIsBadRequest() {
-        Long userId = -1L;
-
-        mockMvc.perform(delete("/users/{userId}", userId))
-                .andExpect(status().isBadRequest());
-
-        verify(userService, never()).deleteUser(anyLong());
     }
 }

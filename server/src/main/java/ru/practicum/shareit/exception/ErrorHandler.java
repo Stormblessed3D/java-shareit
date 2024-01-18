@@ -7,13 +7,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.validation.ConstraintViolationException;
-import javax.validation.ValidationException;
-
 @RestControllerAdvice
 @Slf4j
 public class ErrorHandler {
-    @ExceptionHandler({MethodArgumentNotValidException.class, ConstraintViolationException.class, ValidationException.class})
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handle(RuntimeException e) {
         log.warn("Получен статус 400 Bad request {}", e.getMessage(), e);

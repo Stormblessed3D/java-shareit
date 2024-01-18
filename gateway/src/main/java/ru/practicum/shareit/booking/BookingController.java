@@ -1,7 +1,6 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -27,7 +26,6 @@ import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 @Controller
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
-@Slf4j
 @Validated
 public class BookingController {
     private final BookingClient bookingClient;

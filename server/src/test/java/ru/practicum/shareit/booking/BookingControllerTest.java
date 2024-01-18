@@ -13,9 +13,6 @@ import ru.practicum.shareit.booking.model.BookingStatusState;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.EntityNotFoundException;
 
-import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
-
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,13 +21,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 @WebMvcTest(controllers = BookingController.class)
 class BookingControllerTest {
     @Autowired
@@ -41,7 +38,6 @@ class BookingControllerTest {
     private BookingService bookingService;
 
     private final BookingDtoReceived bookingDtoReceived = BookingDtoReceived.builder()
-            .id(1L)
             .start(LocalDateTime.now().plusSeconds(5))
             .end(LocalDateTime.now().plusDays(1))
             .itemId(1L)
@@ -83,21 +79,6 @@ class BookingControllerTest {
 
     @Test
     @SneakyThrows
-    void getBookingById_whenBookingIdIsNegative_thenThrowValidationException() {
-        Long bookingId = -1L;
-        Long userId = 1L;
-        BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
-
-       mockMvc.perform(get("/bookings/{bookingId}", bookingId)
-                        .header(USER_REQUEST_HEADER, userId))
-                .andExpect(status().isBadRequest())
-                        .andExpect(result -> assertTrue(result.getResolvedException() instanceof ValidationException));
-
-        verify(bookingService, never()).getBookingById(bookingId, userId);
-    }
-
-    @Test
-    @SneakyThrows
     void createBooking_whenInvokedWithValidDtoReceived_thenBookingIsSaved() {
         Long userId = 1L;
         BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
@@ -114,70 +95,6 @@ class BookingControllerTest {
 
         verify(bookingService).createBooking(bookingDtoReceived, userId);
         assertEquals(objectMapper.writeValueAsString(expectedBooking), response);
-    }
-
-    @Test
-    @SneakyThrows
-    void createBooking_whenStartInPast_thenStatusIsBadRequest() {
-        BookingDtoReceived bookingDtoReceived = BookingDtoReceived.builder()
-                .id(1L)
-                .start(LocalDateTime.now().minusSeconds(20))
-                .end(LocalDateTime.now().plusDays(1))
-                .itemId(1L)
-                .build();
-        Long userId = 1L;
-
-        mockMvc.perform(post("/bookings")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(bookingDtoReceived)))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).createBooking(bookingDtoReceived, userId);
-    }
-
-    @Test
-    @SneakyThrows
-    void createBooking_whenEndIsBeforeStart_thenStatusIsBadRequest() {
-        BookingDtoReceived bookingDtoReceived = BookingDtoReceived.builder()
-                .id(1L)
-                .start(LocalDateTime.now().plusSeconds(20))
-                .end(LocalDateTime.now().minusDays(1))
-                .itemId(1L)
-                .build();
-
-        Long userId = 1L;
-        BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
-
-        mockMvc.perform(post("/bookings")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(bookingDtoReceived)))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).createBooking(bookingDtoReceived, userId);
-    }
-
-    @Test
-    @SneakyThrows
-    void createBooking_whenItemIdIsNull_thenStatusIsBadRequest() {
-        BookingDtoReceived bookingDtoReceived = BookingDtoReceived.builder()
-                .id(1L)
-                .start(LocalDateTime.now().plusSeconds(20))
-                .end(LocalDateTime.now().plusDays(1))
-                .itemId(null)
-                .build();
-
-        Long userId = 1L;
-        BookingDtoToReturn expectedBooking = new BookingDtoToReturn();
-
-        mockMvc.perform(post("/bookings")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(bookingDtoReceived)))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).createBooking(bookingDtoReceived, userId);
     }
 
     @Test
@@ -221,34 +138,6 @@ class BookingControllerTest {
 
     @Test
     @SneakyThrows
-    void getAllBookingsByUser_whenInvalidParams_thenResponseStatusIsBadRequest() {
-        Long userId = 1L;
-
-        mockMvc.perform(get("/bookings")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .param("from", "-1")
-                        .param("size", "-1"))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getAllBookingsByUser(anyLong(), eq(BookingStatusState.ALL), anyInt(), anyInt());
-    }
-
-    @Test
-    @SneakyThrows
-    void getAllBookingsByUser_whenSizeParamOver100_thenResponseStatusIsBadRequest() {
-        Long userId = 1L;
-
-        mockMvc.perform(get("/bookings")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .param("from", "0")
-                        .param("size", "101"))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getAllBookingsByUser(anyLong(), eq(BookingStatusState.ALL), anyInt(), anyInt());
-    }
-
-    @Test
-    @SneakyThrows
     void getAllBookingsByOwner_whenInvokedWithValidParams_thenResponseStatusOkWithListOfBookingDtoInBody() {
         Long ownerId = 1L;
         List<BookingDtoToReturn> expectedBookings = List.of(new BookingDtoToReturn());
@@ -264,33 +153,5 @@ class BookingControllerTest {
 
         verify(bookingService).getAllBookingsByOwner(anyLong(), eq(BookingStatusState.ALL), anyInt(), anyInt());
         assertEquals(objectMapper.writeValueAsString(expectedBookings), response);
-    }
-
-    @Test
-    @SneakyThrows
-    void getAllBookingsByOwner_whenInvalidParams_thenResponseStatusIsBadRequest() {
-        Long userId = 1L;
-
-        mockMvc.perform(get("/bookings/owner")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .param("from", "-1")
-                        .param("size", "-1"))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getAllBookingsByUser(anyLong(), eq(BookingStatusState.ALL), anyInt(), anyInt());
-    }
-
-    @Test
-    @SneakyThrows
-    void getAllBookingsByOwner_whenSizeParamOver100_thenResponseStatusIsBadRequest() {
-        Long userId = 1L;
-
-        mockMvc.perform(get("/bookings/owner")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .param("from", "0")
-                        .param("size", "101"))
-                .andExpect(status().isBadRequest());
-
-        verify(bookingService, never()).getAllBookingsByUser(anyLong(), eq(BookingStatusState.ALL), anyInt(), anyInt());
     }
 }

@@ -27,7 +27,6 @@ import ru.practicum.shareit.request.Request;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -101,7 +100,6 @@ class BookingServiceImplTest {
                 .build();
 
         bookingDtoReceived = BookingDtoReceived.builder()
-                .id(1L)
                 .start(LocalDateTime.now().plusSeconds(5))
                 .end(LocalDateTime.now().plusDays(1))
                 .itemId(1L)
@@ -277,7 +275,7 @@ class BookingServiceImplTest {
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         when(userRepository.existsById(userId)).thenReturn(true);
 
-        ValidationException exception = assertThrows(ValidationException.class,
+        UnavailableItemException exception = assertThrows(UnavailableItemException.class,
                 () -> bookingService.approveBooking(bookingId, isApproved, userId));
         verify(bookingRepository).findById(anyLong());
         verify(userRepository).existsById(anyLong());

@@ -20,6 +20,7 @@ import ru.practicum.shareit.comment.CommentDtoResponse;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.CommentRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.UnavailableItemException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
@@ -30,7 +31,6 @@ import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -471,14 +471,14 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void createComment_whenAuthorOfCommentIsNotBooker_thenConstraintViolationExceptionIsThrown() {
+    void createComment_whenAuthorOfCommentIsNotBooker_thenUnavailableItemExceptionIsThrown() {
         Long itemId = item.getId();
         Long userId = owner.getId();
         when(userRepository.findById(userId)).thenReturn(Optional.of(booker));
         when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
         when(bookingRepository.countByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class))).thenReturn(0L);
 
-        assertThrows(ConstraintViolationException.class, () -> itemService.createComment(commentDtoRequest, itemId, userId));
+        assertThrows(UnavailableItemException.class, () -> itemService.createComment(commentDtoRequest, itemId, userId));
         verify(userRepository).findById(userId);
         verify(itemRepository).findById(itemId);
         verify(bookingRepository).countByItemIdAndBookerIdAndEndBefore(anyLong(), anyLong(), any(LocalDateTime.class));

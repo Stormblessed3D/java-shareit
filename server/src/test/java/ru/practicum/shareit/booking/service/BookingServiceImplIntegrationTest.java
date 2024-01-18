@@ -75,7 +75,6 @@ class BookingServiceImplIntegrationTest {
                 .build();
 
         bookingDtoReceived = BookingDtoReceived.builder()
-                .id(1L)
                 .start(LocalDateTime.now())
                 .end(LocalDateTime.now())
                 .itemId(1L)

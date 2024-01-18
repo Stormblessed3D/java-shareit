@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -55,23 +54,6 @@ class RequestControllerTest {
 
         verify(requestService).createRequest(requestDtoPost, userId);
         assertEquals(objectMapper.writeValueAsString(expectedDtoResponse), response);
-    }
-
-    @Test
-    @SneakyThrows
-    void createRequest_whenDescriptionIsBlank_thenStatusIsBadRequest() {
-        RequestDtoPost requestDtoPost = RequestDtoPost.builder()
-                .description("")
-                .build();
-        Long userId = 1L;
-
-        mockMvc.perform(post("/requests")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(requestDtoPost)))
-                .andExpect(status().isBadRequest());
-
-        verify(requestService, never()).createRequest(requestDtoPost, userId);
     }
 
     @Test
@@ -126,19 +108,6 @@ class RequestControllerTest {
         verify(requestService).getRequestById(anyLong(), anyLong());
     }
 
-    @Test
-    @SneakyThrows
-    void getRequestById_whenRequestIdIsNegative_thenResponseStatusIsBadRequest() {
-        Long requestId = -1L;
-        Long userId = 1L;
-
-        mockMvc.perform(get("/requests/{requestId}", requestId)
-                        .header(USER_REQUEST_HEADER, userId))
-                .andExpect(status().isBadRequest());
-
-        verify(requestService, never()).getRequestById(anyLong(), anyLong());
-    }
-
     @SneakyThrows
     @Test
     void getAllWithPagination_whenInvokedWithDefaultParams_thenResponseStatusOkWithListOfRequestDtoInBody() {
@@ -155,35 +124,5 @@ class RequestControllerTest {
 
         verify(requestService).getAllByPages(anyInt(), anyInt(), anyLong());
         assertEquals(objectMapper.writeValueAsString(expectedDtoResponses), response);
-    }
-
-    @Test
-    @SneakyThrows
-    void getAllWithPagination_whenInvalidParams_thenResponseStatusIsBadRequest() {
-        Long userId = 1L;
-
-        mockMvc.perform(get("/requests/all")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .param("from", "-1")
-                        .param("size", "-1"))
-                .andExpect(status().isBadRequest());
-
-        verify(requestService, never()).getAllByPages(anyInt(), anyInt(), anyLong());
-    }
-
-    @Test
-    @SneakyThrows
-    void getAllWithPagination_whenSizeParamOver100_thenResponseStatusIsBadRequest() {
-        Long userId = 1L;
-        List<RequestDtoResponse> expectedDtoResponses = List.of(new RequestDtoResponse());
-        when(requestService.getAllByPages(anyInt(), anyInt(), anyLong())).thenReturn(expectedDtoResponses);
-
-        mockMvc.perform(get("/requests/all")
-                        .header(USER_REQUEST_HEADER, userId)
-                        .param("from", "0")
-                        .param("size", "101"))
-                .andExpect(status().isBadRequest());
-
-        verify(requestService, never()).getAllByPages(anyInt(), anyInt(), anyLong());
     }
 }

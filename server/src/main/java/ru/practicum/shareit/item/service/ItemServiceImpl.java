@@ -18,6 +18,7 @@ import ru.practicum.shareit.comment.CommentDtoResponse;
 import ru.practicum.shareit.comment.CommentMapper;
 import ru.practicum.shareit.comment.CommentRepository;
 import ru.practicum.shareit.exception.EntityNotFoundException;
+import ru.practicum.shareit.exception.UnavailableItemException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDtoRequest;
@@ -28,7 +29,6 @@ import ru.practicum.shareit.request.RequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -171,8 +171,8 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Вещь с id %d не найдена", itemId)));
         Long count = bookingRepository.countByItemIdAndBookerIdAndEndBefore(itemId, userId, LocalDateTime.now());
         if (count == 0) {
-            throw new ConstraintViolationException("Комментарий может оставлять только пользователь, бронировавший вещь " +
-                    "и только к завершенным бронированиям", null);
+            throw new UnavailableItemException("Комментарий может оставлять только пользователь, бронировавший вещь " +
+                    "и только к завершенным бронированиям");
         }
         Comment comment = commentRepository.save(CommentMapper.toComment(commentDtoRequest, item, author));
         return CommentMapper.toCommentDto(comment);

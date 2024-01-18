@@ -22,7 +22,6 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserRepository;
 
-import javax.validation.ValidationException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -62,7 +61,7 @@ public class BookingServiceImpl implements BookingService {
             throw new EntityNotFoundException("Статус бронирования может изменять только владелец");
         }
         if (isApproved && Objects.equals(BookingStatus.APPROVED, booking.getStatus())) {
-            throw new ValidationException("Бронирование уже имеет статус approved");
+            throw new UnavailableItemException("Бронирование уже имеет статус approved");
         }
         if (isApproved) {
             booking.setStatus(BookingStatus.APPROVED);

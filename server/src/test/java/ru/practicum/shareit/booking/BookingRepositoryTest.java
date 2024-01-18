@@ -1,6 +1,5 @@
 package ru.practicum.shareit.booking;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,13 +108,6 @@ class BookingRepositoryTest {
         itemRepository.save(item2);
         bookingRepository.save(booking1);
         bookingRepository.save(booking2);
-    }
-
-    @AfterEach
-    void afterEach() {
-        userRepository.deleteAll();
-        itemRepository.deleteAll();
-        bookingRepository.deleteAll();
     }
 
     @Test

@@ -23,6 +23,8 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Positive;
 
+import java.util.List;
+
 import static ru.practicum.shareit.constant.ConstantKeeper.USER_REQUEST_HEADER;
 
 @Controller
@@ -50,7 +52,11 @@ public class ItemController {
                                          @RequestParam(defaultValue = "0") @Min(value = 0L) Integer from,
                                          @RequestParam(defaultValue = "10") @Positive @Max(value = 100) Integer size,
                                          @RequestHeader(USER_REQUEST_HEADER) Long userId) {
-        return itemClient.search(text, from, size, userId);
+        if (text.isBlank()) {
+            return ResponseEntity.ok(List.of());
+        } else {
+            return itemClient.search(text, from, size, userId);
+        }
     }
 
     @PostMapping
@@ -60,7 +66,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<Object> updateItem(@Validated({OnUpdate.class})  @RequestBody ItemDtoRequest itemDtoRequest,
+    public ResponseEntity<Object> updateItem(@Validated({OnUpdate.class}) @RequestBody ItemDtoRequest itemDtoRequest,
                                              @PathVariable @Positive Long itemId,
                                              @RequestHeader(USER_REQUEST_HEADER) Long ownerId) {
         return itemClient.updateItem(ownerId, itemId, itemDtoRequest);
