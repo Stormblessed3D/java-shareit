@@ -91,7 +91,7 @@ PATCH /bookings/{bookingId}
 ```
 GET /bookings/{bookingId}
 ```
-**1. Получение списка бронирований владельцем вещи** <br /> 
+**5. Получение списка бронирований владельцем вещи** <br /> 
 ```
 GET /bookings/owner
 ```
