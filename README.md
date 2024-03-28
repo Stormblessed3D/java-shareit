@@ -7,14 +7,14 @@
 Сервисы общаются друг с другом через RestTemplate. <br /> 
 
 **Стек технологий:** <br /> 
-Java 11, Spring Boot, Spring MVC, Maven, Hibernate, Mockito, JUnit4, Lombok, PostgreSQL, Docker <br /> 
+Java 11, Spring Boot 2.7.9, Maven, Hibernate, Mockito, JUnit4, Lombok, PostgreSQL, Docker <br /> 
 
 **Инструкция по развертыванию:** <br /> 
 Версия JDK: Amazon Corretto 11      
 Приложение запускается через Docker (сервисы shareIt-server, shareIt-gateway и база данных PostgreSQL запускаются в отдельном Docker-контейнере каждый).         
    
 1. ```mvn package``` - создание jar-файлов        
-2. ```docker-compose up``` - команда для запуска приложения (запускать из папки проекта).       
+2. ```docker-compose up``` - команда для запуска приложения (запускать из папки проекта). Конфигурация описана в файле [docker-compose.yml ](https://github.com/Stormblessed3D/java-shareit/blob/main/docker-compose.yml)             
 
 **Реализована следующая функциональность**:      
 
