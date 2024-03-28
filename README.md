@@ -11,8 +11,8 @@ Java 11, Spring Boot, Spring MVC, Maven, Hibernate, Mockito, JUnit4, Lombok, Pos
 
 **Инструкция по развертыванию:** <br /> 
 Версия JDK: Amazon Corretto 11      
-Приложение запускается через Docker (сервисы shareIt-server, shareIt-gateway и база данных PostgreSQL запускаются в отдельном Docker-контейнере каждый).       
-**Инструкция по запуску приложения:**     
+Приложение запускается через Docker (сервисы shareIt-server, shareIt-gateway и база данных PostgreSQL запускаются в отдельном Docker-контейнере каждый).         
+   
 1. ```mvn package``` - создание jar-файлов        
 2. ```docker-compose up``` - команда для запуска приложения.       
 
