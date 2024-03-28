@@ -14,7 +14,7 @@ Java 11, Spring Boot, Spring MVC, Maven, Hibernate, Mockito, JUnit4, Lombok, Pos
 Приложение запускается через Docker (сервисы shareIt-server, shareIt-gateway и база данных PostgreSQL запускаются в отдельном Docker-контейнере каждый).         
    
 1. ```mvn package``` - создание jar-файлов        
-2. ```docker-compose up``` - команда для запуска приложения.       
+2. ```docker-compose up``` - команда для запуска приложения (запускать из папки проекта).       
 
 **Реализована следующая функциональность**:      
 
